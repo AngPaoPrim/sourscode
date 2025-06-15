@@ -730,17 +730,3 @@ app.get('/', (req, res) => {
         .form-group {
           margin-bottom: 20px;
         }
-        label {
-          display: block;
-          margin-bottom: 8px;
-          color: #333;
-          font-weight: 500;
-        }
-        input[type="url"] {
-          width: 100%;
-          padding: 15px;
-          border: 2px solid #ddd;
-          border-radius: 10px;
-          font-size: 16px;
-          transition: border-color 0.3s ease;
-        }
