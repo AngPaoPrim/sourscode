@@ -39,7 +39,7 @@ function simpleRateLimit(req, res, next) {
     userData.lastRequest = now;
   }
   
-  if (userData.count > 30) { // เพิ่ม limit เป็น 30
+  if (userData.count > 30) {
     return res.status(429).send(`
       <h2>🚫 คำขอมากเกินไป</h2>
       <p>กรุณารอสักครู่แล้วลองใหม่</p>
@@ -194,8 +194,9 @@ async function smartFetch(url) {
   
   // Method 3: Axios without SSL verification (for some sites)
   console.log('🔓 Trying without SSL verification...');
+  const https = require('https');
   result = await fetchWithAxios(url, { 
-    httpsAgent: new (require('https')).Agent({ rejectUnauthorized: false })
+    httpsAgent: new https.Agent({ rejectUnauthorized: false })
   });
   
   if (result.success && result.data && typeof result.data === 'string') {
@@ -490,7 +491,7 @@ function generateSuccessPage(url, sourceCode, method = 'axios') {
           const code = document.getElementById('source-code').textContent;
           const url = '${escapeHtml(url)}';
           const domain = new URL(url).hostname;
-          const filename = \`\${domain}_source.html\`;
+          const filename = domain + '_source.html';
           
           const blob = new Blob([code], { type: 'text/html;charset=utf-8' });
           const link = document.createElement('a');
@@ -538,11 +539,11 @@ function generateSuccessPage(url, sourceCode, method = 'axios') {
           const code = codeElement.textContent;
           
           if (!searchTerm) {
-            codeElement.innerHTML = \`\${escapeHtml(code)}\`;
+            codeElement.innerHTML = escapeHtml(code);
             return;
           }
           
-          const regex = new RegExp(\`(\${searchTerm.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')})\`, 'gi');
+          const regex = new RegExp('(' + searchTerm.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&') + ')', 'gi');
           const highlightedCode = escapeHtml(code).replace(regex, '<mark style="background: #ffeb3b; color: #000;">$1</mark>');
           codeElement.innerHTML = highlightedCode;
         }
@@ -567,7 +568,7 @@ function generateSuccessPage(url, sourceCode, method = 'axios') {
           const selection = window.getSelection().toString();
           const selectedElement = document.getElementById('selectedText');
           if (selection.length > 0) {
-            selectedElement.textContent = \`เลือก: \${selection.length} ตัวอักษร\`;
+            selectedElement.textContent = 'เลือก: ' + selection.length + ' ตัวอักษร';
           } else {
             selectedElement.textContent = '';
           }
@@ -743,245 +744,3 @@ app.get('/', (req, res) => {
           font-size: 16px;
           transition: border-color 0.3s ease;
         }
-        input[type="url"]:focus {
-          outline: none;
-          border-color: #667eea;
-        }
-        .btn-submit {
-          width: 100%;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          border: none;
-          padding: 15px;
-          border-radius: 10px;
-          font-size: 18px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: transform 0.3s ease;
-        }
-        .btn-submit:hover {
-          transform: translateY(-2px);
-        }
-        .features {
-          margin-top: 30px;
-          padding-top: 20px;
-          border-top: 1px solid #eee;
-        }
-        .feature-list {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-          gap: 15px;
-          margin-top: 15px;
-        }
-        .feature-item {
-          text-align: center;
-          padding: 10px;
-          background: #f8f9fa;
-          border-radius: 8px;
-          font-size: 14px;
-          color: #555;
-        }
-        .loading {
-          display: none;
-          text-align: center;
-          margin-top: 20px;
-        }
-        .spinner {
-          border: 3px solid #f3f3f3;
-          border-top: 3px solid #667eea;
-          border-radius: 50%;
-          width: 30px;
-          height: 30px;
-          animation: spin 1s linear infinite;
-          margin: 0 auto 10px;
-        }
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        @media (max-width: 600px) {
-          .container { padding: 20px; }
-          h1 { font-size: 24px; }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <h1>🌐 Enhanced Web Fetcher</h1>
-        <p class="subtitle">ดึง Source Code จากเว็บไซต์ใดๆ ได้ทุกเว็บ</p>
-        
-        <form id="fetchForm" action="/fetch-code" method="POST">
-          <div class="form-group">
-            <label for="url">🔗 URL เว็บไซต์:</label>
-            <input 
-              type="url" 
-              id="url" 
-              name="url" 
-              placeholder="https://example.com" 
-              required
-              autocomplete="url"
-            >
-          </div>
-          
-          <button type="submit" class="btn-submit">
-            🚀 ดึงข้อมูล
-          </button>
-          
-          <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>กำลังดึงข้อมูล... กรุณารอสักครู่</p>
-          </div>
-        </form>
-
-        <div class="features">
-          <h3 style="text-align: center; color: #333; margin-bottom: 15px;">✨ ฟีเจอร์พิเศษ</h3>
-          <div class="feature-list">
-            <div class="feature-item">
-              <div>🤖</div>
-              <div>AI Browser</div>
-            </div>
-            <div class="feature-item">
-              <div>🔄</div>
-              <div>Multiple Methods</div>
-            </div>
-            <div class="feature-item">
-              <div>🛡️</div>
-              <div>Bypass Protection</div>
-            </div>
-            <div class="feature-item">
-              <div>📱</div>
-              <div>Mobile Support</div>
-            </div>
-            <div class="feature-item">
-              <div>🔍</div>
-              <div>Smart Search</div>
-            </div>
-            <div class="feature-item">
-              <div>💾</div>
-              <div>Download</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <script>
-        document.getElementById('fetchForm').addEventListener('submit', function(e) {
-          const loading = document.getElementById('loading');
-          const submitBtn = document.querySelector('.btn-submit');
-          
-          loading.style.display = 'block';
-          submitBtn.disabled = true;
-          submitBtn.textContent = 'กำลังดึงข้อมูล...';
-        });
-
-        // Auto-format URL
-        document.getElementById('url').addEventListener('input', function(e) {
-          let url = e.target.value.trim();
-          if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
-            e.target.value = 'https://' + url;
-          }
-        });
-      </script>
-    </body>
-    </html>
-  `);
-});
-
-// Health check with enhanced info
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    version: '2.0.0',
-    features: ['axios', 'puppeteer', 'multi-method', 'enhanced-headers'],
-    time: new Date().toISOString(),
-    uptime: process.uptime()
-  });
-});
-
-// API endpoint for programmatic access
-app.post('/api/fetch', simpleRateLimit, async (req, res) => {
-  const { url } = req.body;
-  
-  if (!url || !isValidUrl(url)) {
-    return res.status(400).json({ 
-      success: false, 
-      error: 'Invalid URL provided' 
-    });
-  }
-
-  try {
-    console.log(`🔌 API fetch request for: ${url}`);
-    const result = await smartFetch(url);
-    
-    if (!result.success) {
-      throw new Error(result.error);
-    }
-
-    res.json({
-      success: true,
-      url: url,
-      content: result.data,
-      size: result.data.length,
-      lines: result.data.split('\n').length,
-      timestamp: new Date().toISOString()
-    });
-    
-  } catch (error) {
-    console.error('API Error:', error.message);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      url: url,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).send(`
-    <div style="font-family: Arial, sans-serif; text-align: center; margin-top: 100px; color: #333;">
-      <h2>🔍 ไม่พบหน้า</h2>
-      <p>หน้าที่คุณต้องการไม่มีอยู่</p>
-      <a href="/" style="color: #4CAF50; text-decoration: none;">กลับหน้าแรก</a>
-    </div>
-  `);
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  console.error('Server error:', err);
-  res.status(500).send(`
-    <div style="font-family: Arial, sans-serif; text-align: center; margin-top: 100px; color: #333;">
-      <h2>💥 เซิร์ฟเวอร์เกิดปัญหา</h2>
-      <p>กรุณาลองใหม่อีกครั้ง</p>
-      <a href="/" style="color: #4CAF50; text-decoration: none;">กลับ</a>
-    </div>
-  `);
-});
-
-// Start server
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Enhanced Web Fetcher Server running at http://localhost:${PORT}`);
-  console.log(`📅 Started: ${new Date().toLocaleString('th-TH')}`);
-  console.log(`🛠️  Features: Multiple fetch methods, Puppeteer support, Enhanced headers`);
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('Shutting down gracefully...');
-  clearInterval(cleanupInterval);
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
-  });
-});
-
-process.on('SIGINT', () => {
-  console.log('Shutting down gracefully...');
-  clearInterval(cleanupInterval);
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
-  });
-});
